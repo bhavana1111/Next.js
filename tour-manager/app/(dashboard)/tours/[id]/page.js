@@ -3,6 +3,9 @@ import { generateTourImage } from "@/utils/actions";
 import prisma from "@/utils/db";
 import Link from "next/link";
 import Image from "next/image";
+import axios from "axios";
+
+const url = `https://api.unsplash.com/search/photos?client_id=${process.env.UNSPLASH_API_KEY}&query=`;
 
 const SingleTourPage = async ({ params }) => {
   const tour = await prisma.tour.findUnique({
@@ -11,10 +14,15 @@ const SingleTourPage = async ({ params }) => {
     },
   });
 
-  const tourImage = await generateTourImage({
-    city: tour.city,
-    country: tour.country,
-  });
+  //   const tourImage = await generateTourImage({
+  //     city: tour.city,
+  //     country: tour.country,
+  //   });
+  if (!tour) {
+    redirect("/tours");
+  }
+  const { data } = await axios.get(`${url}${tour.city}`);
+  const tourImage = data?.results[0]?.urls?.raw;
   return (
     <div>
       <Link href="/tours" className="btn btn-secondary mb-12">
